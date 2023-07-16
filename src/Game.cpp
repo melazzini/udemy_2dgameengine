@@ -4,6 +4,7 @@
 #include <SDL_events.h>
 #include <SDL_keycode.h>
 #include <SDL_render.h>
+#include <SDL_timer.h>
 #include <SDL_video.h>
 #include <iostream>
 
@@ -23,8 +24,8 @@ bool Game::IsRunning() const
 
 float projectilePosX = 0.0f;
 float projectilePosY = 0.0f;
-float projectileVelX = 0.01f;
-float projectileVelY = 0.01f;
+float projectileVelX = 100.01f;
+float projectileVelY = 100.01f;
 
 void Game::Initialize(int width, int height)
 {
@@ -50,6 +51,7 @@ void Game::Initialize(int width, int height)
     }
 
     isRunning = true;
+    ticksSinceLastFrame = SDL_GetTicks();
     return;
 }
 
@@ -77,8 +79,17 @@ void Game::ProcessInput()
 
 void Game::Update()
 {
-    projectilePosX += projectileVelX;
-    projectilePosY += projectileVelY;
+    auto ticks = SDL_GetTicks();
+    auto deltaTime_ms = (ticks - ticksSinceLastFrame);
+    ticksSinceLastFrame = ticks;
+
+    if (deltaTime_ms < MIN_DELTA_TIME)
+    {
+        SDL_Delay(MIN_DELTA_TIME - deltaTime_ms);
+    }
+    deltaTime_ms = MIN_DELTA_TIME;
+    projectilePosX += projectileVelX * deltaTime_ms / 1000;
+    projectilePosY += projectileVelY * deltaTime_ms / 1000;
 }
 
 void Game::Render()

@@ -11,6 +11,7 @@ class Game
     bool isRunning;
     SDL_Window *window;
     SDL_Renderer *renderer;
+    uint32_t ticksSinceLastFrame;
 
   public:
     Game();

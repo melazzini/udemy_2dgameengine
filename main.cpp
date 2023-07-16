@@ -4,16 +4,18 @@
 
 int main(int argc, char *argv[])
 {
-    Game *game = new Game();
+    Game game;
 
-    game->Initialize(WINDOW_WIDTH, WINDOW_HEIGH);
+    game.Initialize(WINDOW_WIDTH, WINDOW_HEIGH);
 
-    while (game->IsRunning())
+    while (game.IsRunning())
     {
-        game->ProcessInput();
-        game->Update();
-        game->Render();
+        game.ProcessInput();
+        game.Update();
+        game.Render();
     }
 
-    game->Destroy();
+    game.Destroy();
+
+    return 0;
 }

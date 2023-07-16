@@ -1,6 +1,19 @@
+#include "Constants.hpp"
+#include "Game.hpp"
 #include <iostream>
 
 int main(int argc, char *argv[])
 {
-    std::cout << "Hello world!" << std::endl;
+    Game *game = new Game();
+
+    game->Initialize(WINDOW_WIDTH, WINDOW_HEIGH);
+
+    while (game->IsRunning())
+    {
+        game->ProcessInput();
+        game->Update();
+        game->Render();
+    }
+
+    game->Destroy();
 }

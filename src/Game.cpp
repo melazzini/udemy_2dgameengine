@@ -1,5 +1,8 @@
 #include "Game.hpp"
+#include "Components/TransformComponent.hpp"
 #include "Constants.hpp"
+#include "Entity.hpp"
+#include "EntityManager.hpp"
 #include <SDL.h>
 #include <SDL_events.h>
 #include <SDL_keycode.h>
@@ -9,6 +12,8 @@
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <iostream>
+EntityManager manager;
+SDL_Renderer *Game::renderer = nullptr;
 
 Game::Game()
 {
@@ -23,9 +28,6 @@ bool Game::IsRunning() const
 {
     return this->isRunning;
 }
-
-glm::vec2 projectilePos = glm::vec2(0.0f, 0.0f);
-glm::vec2 projectileVel = glm::vec2(100.0f, 100.0f);
 
 void Game::Initialize(int width, int height)
 {
@@ -43,16 +45,22 @@ void Game::Initialize(int width, int height)
         return;
     }
 
-    renderer = SDL_CreateRenderer(window, -1, 0);
-    if (!renderer)
+    Game::renderer = SDL_CreateRenderer(window, -1, 0);
+    if (!Game::renderer)
     {
         std::cerr << "Error creating SDL renderer." << std::endl;
         return;
     }
+    LoadLevel(0);
 
     isRunning = true;
     ticksSinceLastFrame = SDL_GetTicks();
     return;
+}
+void Game::LoadLevel(int levelNumber)
+{
+    Entity &newEntity(manager.AddEntity("projectile"));
+    newEntity.addComponent<TransformComponent>(0, 0, 20, 20, 32, 32, 1);
 }
 
 void Game::ProcessInput()
@@ -88,25 +96,26 @@ void Game::Update()
         SDL_Delay(MIN_DELTA_TIME - deltaTime_ms);
     }
     deltaTime_ms = MIN_DELTA_TIME;
-    projectilePos = glm::vec2(projectilePos.x + projectileVel.x * deltaTime_ms / 1000,
-                              projectilePos.y + projectileVel.y * deltaTime_ms / 1000);
+    manager.Update(deltaTime_ms);
 }
 
 void Game::Render()
 {
-    SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);
-    SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(Game::renderer, 21, 21, 21, 255);
+    SDL_RenderClear(Game::renderer);
 
-    SDL_Rect projectile{(int)projectilePos.x, (int)projectilePos.y, 100, 100};
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderFillRect(renderer, &projectile);
+    if (manager.HasNoEntities())
+    {
+        return;
+    }
+    manager.Render();
 
-    SDL_RenderPresent(renderer);
+    SDL_RenderPresent(Game::renderer);
 }
 
 void Game::Destroy()
 {
-    SDL_DestroyRenderer(renderer);
+    SDL_DestroyRenderer(Game::renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }

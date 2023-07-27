@@ -1,6 +1,10 @@
 #pragma once
 #include "Component.hpp"
+#include <fmt/core.h>
+#include <iostream>
+#include <map>
 #include <string>
+#include <typeinfo>
 #include <vector>
 
 class EntityManager;
@@ -11,6 +15,7 @@ class Entity
     EntityManager &manager;
     bool isActive;
     std::vector<Component *> components;
+    std::map<const std::type_info *, Component *> componentTypeMap;
 
   public:
     std::string name;
@@ -26,7 +31,22 @@ class Entity
         T *component = new T{std::forward<Args>(args)...};
         component->owner = this;
         components.push_back(component);
+        componentTypeMap[&typeid(*component)] = component;
         component->Initialize();
         return *component;
+    }
+
+    template <typename T> T *GetComponet()
+    {
+        return static_cast<T *>(componentTypeMap[&typeid(T)]);
+    }
+
+    void ListAllComponents() const
+    {
+        for (auto component_i : componentTypeMap)
+        {
+            // std::cout << fmt::format("Component<{}>", typeid(*component_i).name()) << std::endl;
+            std::cout << fmt::format("Component<{}>", component_i.first->name()) << std::endl;
+        }
     }
 };

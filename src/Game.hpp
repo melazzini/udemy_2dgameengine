@@ -5,6 +5,7 @@
 #include <SDL_render.h>
 #include <SDL_video.h>
 
+class AssetManager;
 class Game
 {
   private:
@@ -16,6 +17,7 @@ class Game
     Game();
     ~Game();
     static SDL_Renderer *renderer;
+    static AssetManager *assetManager;
     void LoadLevel(int levelNumber);
 
     bool IsRunning() const;

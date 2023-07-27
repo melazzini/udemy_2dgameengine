@@ -1,4 +1,6 @@
 #include "Game.hpp"
+#include "AssetManager.hpp"
+#include "Components/SpriteComponent.hpp"
 #include "Components/TransformComponent.hpp"
 #include "Constants.hpp"
 #include "Entity.hpp"
@@ -14,10 +16,11 @@
 #include <iostream>
 EntityManager manager;
 SDL_Renderer *Game::renderer = nullptr;
-
+AssetManager *Game::assetManager;
 Game::Game()
 {
     this->isRunning = true;
+    assetManager = new AssetManager(&manager);
 }
 
 Game::~Game()
@@ -59,8 +62,22 @@ void Game::Initialize(int width, int height)
 }
 void Game::LoadLevel(int levelNumber)
 {
-    Entity &newEntity(manager.AddEntity("projectile"));
+    /*
+     * start including new assets to the assetsmanager list
+     */
+    std::string textureFilePath =
+        "/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/images/tank-big-right.png";
+    assetManager->AddTexture("tank-image", textureFilePath.c_str());
+
+    /*
+     * start including new entities and also components to them
+     */
+
+    Entity &newEntity(manager.AddEntity("tank"));
     newEntity.addComponent<TransformComponent>(0, 0, 20, 20, 32, 32, 1);
+    newEntity.addComponent<SpriteComponent>("tank-image");
+
+    manager.DisplayAllEntities();
 }
 
 void Game::ProcessInput()

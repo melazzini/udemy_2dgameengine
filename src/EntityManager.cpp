@@ -1,5 +1,7 @@
 #include "EntityManager.hpp"
 #include "Entity.hpp"
+#include <fmt/core.h>
+#include <iostream>
 #include <vector>
 
 void EntityManager::ClearData()
@@ -46,4 +48,13 @@ std::vector<Entity *> EntityManager::GetEntities() const
 unsigned int EntityManager::GetEntityCount()
 {
     return entities.size();
+}
+
+void EntityManager::DisplayAllEntities() const
+{
+    for (auto entity : entities)
+    {
+        std::cout << fmt::format("Entity Name: {}", entity->name) << std::endl;
+        entity->ListAllComponents();
+    }
 }

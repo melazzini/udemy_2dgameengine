@@ -49,4 +49,9 @@ class Entity
             std::cout << fmt::format("Component<{}>", component_i.first->name()) << std::endl;
         }
     }
+
+    template <typename TComponent> bool HasComponent() const
+    {
+        return componentTypeMap.find(&typeid(TComponent)) != componentTypeMap.end();
+    }
 };

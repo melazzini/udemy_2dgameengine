@@ -65,17 +65,37 @@ void Game::LoadLevel(int levelNumber)
     /*
      * start including new assets to the assetsmanager list
      */
-    std::string textureFilePath =
-        "/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/images/tank-big-right.png";
-    assetManager->AddTexture("tank-image", textureFilePath.c_str());
+    assetManager->AddTexture(
+        "tank-image",
+        std::string(
+            "/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/images/tank-big-right.png")
+            .c_str());
+    assetManager->AddTexture(
+        "chopper-image",
+        std::string(
+            "/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/images/chopper-spritesheet.png")
+            .c_str());
+
+    assetManager->AddTexture(
+        "radar-image",
+        std::string("/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/images/radar.png")
+            .c_str());
 
     /*
      * start including new entities and also components to them
      */
 
-    Entity &newEntity(manager.AddEntity("tank"));
-    newEntity.addComponent<TransformComponent>(0, 0, 20, 20, 32, 32, 1);
-    newEntity.addComponent<SpriteComponent>("tank-image");
+    Entity &tankEntity(manager.AddEntity("tank"));
+    tankEntity.addComponent<TransformComponent>(0, 0, 20, 20, 32, 32, 1);
+    tankEntity.addComponent<SpriteComponent>("tank-image");
+
+    Entity &chopperEntity(manager.AddEntity("tank"));
+    chopperEntity.addComponent<TransformComponent>(240, 106, 0, 0, 32, 32, 1);
+    chopperEntity.addComponent<SpriteComponent>("chopper-image", 2, 90, true, false);
+
+    Entity &radarEntity(manager.AddEntity("radar"));
+    radarEntity.addComponent<TransformComponent>(720, 15, 0, 0, 64, 64, 1);
+    radarEntity.addComponent<SpriteComponent>("radar-image", 8, 150, false, true);
 
     manager.DisplayAllEntities();
 }

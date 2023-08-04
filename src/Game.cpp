@@ -1,5 +1,6 @@
 #include "Game.hpp"
 #include "AssetManager.hpp"
+#include "Components/KeyboardControlComponent.hpp"
 #include "Components/SpriteComponent.hpp"
 #include "Components/TransformComponent.hpp"
 #include "Constants.hpp"
@@ -17,6 +18,7 @@
 EntityManager manager;
 SDL_Renderer *Game::renderer = nullptr;
 AssetManager *Game::assetManager;
+SDL_Event *Game::event{};
 Game::Game()
 {
     this->isRunning = true;
@@ -58,6 +60,7 @@ void Game::Initialize(int width, int height)
 
     isRunning = true;
     ticksSinceLastFrame = SDL_GetTicks();
+    event = new SDL_Event;
     return;
 }
 void Game::LoadLevel(int levelNumber)
@@ -89,9 +92,10 @@ void Game::LoadLevel(int levelNumber)
     tankEntity.addComponent<TransformComponent>(0, 0, 20, 20, 32, 32, 1);
     tankEntity.addComponent<SpriteComponent>("tank-image");
 
-    Entity &chopperEntity(manager.AddEntity("tank"));
+    Entity &chopperEntity(manager.AddEntity("chopper"));
     chopperEntity.addComponent<TransformComponent>(240, 106, 0, 0, 32, 32, 1);
     chopperEntity.addComponent<SpriteComponent>("chopper-image", 2, 90, true, false);
+    chopperEntity.addComponent<KeyboardControlComponent>("up", "down", "right", "left", "space");
 
     Entity &radarEntity(manager.AddEntity("radar"));
     radarEntity.addComponent<TransformComponent>(720, 15, 0, 0, 64, 64, 1);
@@ -102,16 +106,15 @@ void Game::LoadLevel(int levelNumber)
 
 void Game::ProcessInput()
 {
-    SDL_Event event;
-    SDL_PollEvent(&event);
-    switch (event.type)
+    SDL_PollEvent(event);
+    switch (event->type)
     {
     case SDL_QUIT: {
         isRunning = false;
         break;
     }
     case SDL_KEYDOWN: {
-        if (event.key.keysym.sym == SDLK_ESCAPE)
+        if (event->key.keysym.sym == SDLK_ESCAPE)
         {
             isRunning = false;
             break;

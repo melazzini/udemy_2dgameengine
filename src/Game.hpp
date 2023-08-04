@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL_events.h>
 #include <SDL_render.h>
 #include <SDL_video.h>
 
@@ -18,6 +19,7 @@ class Game
     ~Game();
     static SDL_Renderer *renderer;
     static AssetManager *assetManager;
+    static SDL_Event* event;
     void LoadLevel(int levelNumber);
 
     bool IsRunning() const;

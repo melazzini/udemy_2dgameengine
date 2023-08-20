@@ -1,5 +1,6 @@
 #include "Game.hpp"
 #include "AssetManager.hpp"
+#include "Components/ColliderComponent.hpp"
 #include "Components/KeyboardControlComponent.hpp"
 #include "Components/SpriteComponent.hpp"
 #include "Components/TransformComponent.hpp"
@@ -106,11 +107,13 @@ void Game::LoadLevel(int levelNumber)
     Entity &tankEntity(manager.AddEntity("tank", LayerType::ENEMY_LAYER));
     tankEntity.addComponent<TransformComponent>(0, 0, 20, 20, 32, 32, 1);
     tankEntity.addComponent<SpriteComponent>("tank-image");
+    tankEntity.addComponent<ColliderComponent>("enemy", 0, 0, 32, 32);
 
     Entity &chopperEntity(manager.AddEntity("chopper", LayerType::PLAYER_LAYER));
     chopperEntity.addComponent<TransformComponent>(240, 106, 0, 0, 32, 32, 1);
     chopperEntity.addComponent<SpriteComponent>("chopper-image", 2, 90, true, false);
     chopperEntity.addComponent<KeyboardControlComponent>("up", "down", "right", "left", "space");
+    chopperEntity.addComponent<ColliderComponent>("player", 240, 106, 32, 32);
     player = &chopperEntity;
 
     Entity &radarEntity(manager.AddEntity("radar", LayerType::UI_LAYER));
@@ -154,6 +157,7 @@ void Game::Update()
     deltaTime_ms = MIN_DELTA_TIME;
     manager.Update(deltaTime_ms);
     HandleCameraMovement();
+    CheckCollisions();
 }
 
 void Game::HandleCameraMovement()
@@ -161,8 +165,17 @@ void Game::HandleCameraMovement()
     auto transform = player->GetComponet<TransformComponent>();
     camera.x = transform->position.x - WINDOW_WIDTH / 2;
     camera.y = transform->position.y - WINDOW_HEIGH / 2;
-    camera.x = (camera.x > 0) ? (camera.x<WINDOW_WIDTH?camera.x:WINDOW_WIDTH) : 0;
-    camera.y = (camera.y > 0) ? (camera.y<WINDOW_HEIGH?camera.y:WINDOW_HEIGH) : 0;
+    camera.x = (camera.x > 0) ? (camera.x < WINDOW_WIDTH ? camera.x : WINDOW_WIDTH) : 0;
+    camera.y = (camera.y > 0) ? (camera.y < WINDOW_HEIGH ? camera.y : WINDOW_HEIGH) : 0;
+}
+
+void Game::CheckCollisions()
+{
+    std::string collitionTagType = manager.CheckCollisions(*player);
+    if (collitionTagType == "enemy")
+    {
+        isRunning = false;
+    }
 }
 
 void Game::Render()

@@ -1,4 +1,6 @@
 #include "EntityManager.hpp"
+#include "Collision.hpp"
+#include "Components/ColliderComponent.hpp"
 #include "Constants.hpp"
 #include "Entity.hpp"
 #include <algorithm>
@@ -70,4 +72,25 @@ void EntityManager::DisplayAllEntities() const
         std::cout << fmt::format("Entity Name: {}", entity->name) << std::endl;
         entity->ListAllComponents();
     }
+}
+
+std::string EntityManager::CheckCollisions(Entity &myEntity) const
+{
+    ColliderComponent *myCollider = myEntity.GetComponet<ColliderComponent>();
+    for (auto otherEntity : entities)
+    {
+        if (otherEntity == &myEntity || otherEntity->name == "Tile")
+        {
+            continue;
+        }
+        if (otherEntity->HasComponent<ColliderComponent>())
+        {
+            if (Collision::CheckRectangleCollision(otherEntity->GetComponet<ColliderComponent>()->collider,
+                                                   myCollider->collider))
+            {
+                return otherEntity->GetComponet<ColliderComponent>()->colliderTag;
+            }
+        }
+    }
+    return "";
 }

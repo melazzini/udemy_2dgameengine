@@ -23,6 +23,7 @@ class Game
     static SDL_Rect camera;
     void LoadLevel(int levelNumber);
     void HandleCameraMovement();
+    void CheckCollisions();
 
     bool IsRunning() const;
     void Initialize(int width, int height);

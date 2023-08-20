@@ -74,23 +74,42 @@ void EntityManager::DisplayAllEntities() const
     }
 }
 
-std::string EntityManager::CheckCollisions(Entity &myEntity) const
+CollisionType EntityManager::CheckCollisions() const
 {
-    ColliderComponent *myCollider = myEntity.GetComponet<ColliderComponent>();
-    for (auto otherEntity : entities)
+    // WE CAN IMPROVE THE LOGIC OF THIS FUNCTION OURSELFS AFTER FINISHING THE COURSE
+
+    for (auto iter{std::begin(entities)}; iter != std::end(entities); iter++)
     {
-        if (otherEntity == &myEntity || otherEntity->name == "Tile")
+        if (!(*iter)->HasComponent<ColliderComponent>())
         {
             continue;
         }
-        if (otherEntity->HasComponent<ColliderComponent>())
-        {
-            if (Collision::CheckRectangleCollision(otherEntity->GetComponet<ColliderComponent>()->collider,
-                                                   myCollider->collider))
+        auto next = iter + 1;
+        auto colliderEntity = std::find_if(next, std::end(entities), [iter](Entity *other) {
+            if (other->HasComponent<ColliderComponent>())
             {
-                return otherEntity->GetComponet<ColliderComponent>()->colliderTag;
+                auto colliderComponent = other->GetComponet<ColliderComponent>();
+                if (Collision::CheckRectangleCollision(colliderComponent->collider,
+                                                       (*iter)->GetComponet<ColliderComponent>()->collider))
+                {
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        if (colliderEntity != std::end(entities))
+        {
+            auto colliderTag1 = (*colliderEntity)->GetComponet<ColliderComponent>()->colliderTag;
+            auto colliderTag2 = (*iter)->GetComponet<ColliderComponent>()->colliderTag;
+
+            if ((colliderTag1 == "player" && colliderTag2 == "enemy") ||
+                (colliderTag1 == "enemy" && colliderTag2 == "player"))
+            {
+                return CollisionType::PLAYER_ENEMY_COLLISION;
             }
         }
     }
-    return "";
+
+    return CollisionType::NO_COLLISION;
 }

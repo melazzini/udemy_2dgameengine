@@ -24,6 +24,8 @@ class Game
     void LoadLevel(int levelNumber);
     void HandleCameraMovement();
     void CheckCollisions();
+    void ProcessGameOver();
+    void ProcessNextLevel();
 
     bool IsRunning() const;
     void Initialize(int width, int height);

@@ -171,11 +171,27 @@ void Game::HandleCameraMovement()
 
 void Game::CheckCollisions()
 {
-    std::string collitionTagType = manager.CheckCollisions(*player);
-    if (collitionTagType == "enemy")
+    auto collitionTagType = manager.CheckCollisions();
+    if (collitionTagType == CollisionType::PLAYER_ENEMY_COLLISION)
     {
-        isRunning = false;
+        ProcessGameOver();
     }
+    else if (collitionTagType == CollisionType::PLAYER_LEVEL_COMPLETE_COLLISION)
+    {
+        ProcessNextLevel();
+    }
+}
+
+void Game::ProcessGameOver()
+{
+    std::cout << "Game Over" << std::endl;
+    isRunning = false;
+}
+
+void Game::ProcessNextLevel()
+{
+    std::cout << "Next Level" << std::endl;
+    isRunning = false;
 }
 
 void Game::Render()

@@ -99,8 +99,8 @@ class SpriteComponent : public Component
             sourcerectangle.x = sourcerectangle.w * static_cast<int>((SDL_GetTicks() / animationSpeed) % numFrames);
         }
         sourcerectangle.y = animationIndex * transform->height;
-        destinationRectangle.x = (int)transform->position.x;
-        destinationRectangle.y = (int)transform->position.y;
+        destinationRectangle.x = (int)transform->position.x - (isFixed ? 0 : Game::camera.x);
+        destinationRectangle.y = (int)transform->position.y - (isFixed ? 0 : Game::camera.y);
         destinationRectangle.w = (int)transform->width * transform->scale;
         destinationRectangle.h = (int)transform->height * transform->scale;
     }

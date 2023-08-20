@@ -4,8 +4,8 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(fmt REQUIRED)
 
-add_library(game Game.cpp Entity.cpp EntityManager.cpp AssetManager.cpp TextureManager.cpp ./Components/TransformComponent.hpp 
-    ./Components/SpriteComponent.hpp Animation.cpp ./Components/KeyboardControlComponent.hpp)
-
+add_library(game Game.cpp Entity.cpp EntityManager.cpp AssetManager.cpp TextureManager.cpp Map.cpp ./Components/TransformComponent.hpp 
+    ./Components/SpriteComponent.hpp Animation.cpp ./Components/KeyboardControlComponent.hpp ./Components/TileComponent.hpp)
+set_target_properties(game PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
 target_include_directories(game PUBLIC ${SDL2_INCLUDE_DIRS})
 target_link_libraries(game ${SDL2_LIBRARIES} ${SDL2IMAGE_LIBRARY} fmt::fmt)

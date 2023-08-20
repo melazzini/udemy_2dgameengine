@@ -1,7 +1,9 @@
 #include "EntityManager.hpp"
+#include "Constants.hpp"
 #include "Entity.hpp"
-#include <fmt/core.h>
+#include <algorithm>
 #include <iostream>
+#include <iterator>
 #include <vector>
 
 void EntityManager::ClearData()
@@ -27,15 +29,18 @@ void EntityManager::Update(float deltaTime)
 
 void EntityManager::Render()
 {
-    for (auto &entity : entities)
+    for (int layerNum = 0; layerNum < NUM_LAYERS; layerNum++)
     {
-        entity->Render();
+        for (auto entity : GetEntitiesByLayer(LayerType(layerNum)))
+        {
+            entity->Render();
+        }
     }
 }
 
-Entity &EntityManager::AddEntity(std::string entityName)
+Entity &EntityManager::AddEntity(std::string entityName, LayerType layer)
 {
-    Entity *entity = new Entity(*this, entityName);
+    Entity *entity = new Entity(*this, entityName, layer);
     entities.emplace_back(entity);
     return *entity;
 }
@@ -43,6 +48,14 @@ Entity &EntityManager::AddEntity(std::string entityName)
 std::vector<Entity *> EntityManager::GetEntities() const
 {
     return entities;
+}
+std::vector<Entity *> EntityManager::GetEntitiesByLayer(LayerType layer) const
+{
+    std::vector<Entity *> filteredEntities;
+    std::copy_if(std::begin(entities), std::end(entities), std::back_inserter(filteredEntities),
+                 [layer](const Entity *entity) { return entity->layer == layer; });
+
+    return filteredEntities;
 }
 
 unsigned int EntityManager::GetEntityCount()

@@ -19,8 +19,10 @@ class Game
     ~Game();
     static SDL_Renderer *renderer;
     static AssetManager *assetManager;
-    static SDL_Event* event;
+    static SDL_Event *event;
+    static SDL_Rect camera;
     void LoadLevel(int levelNumber);
+    void HandleCameraMovement();
 
     bool IsRunning() const;
     void Initialize(int width, int height);

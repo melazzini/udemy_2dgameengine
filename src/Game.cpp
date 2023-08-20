@@ -6,19 +6,26 @@
 #include "Constants.hpp"
 #include "Entity.hpp"
 #include "EntityManager.hpp"
+#include "Map.hpp"
 #include <SDL.h>
 #include <SDL_events.h>
 #include <SDL_keycode.h>
 #include <SDL_render.h>
 #include <SDL_timer.h>
 #include <SDL_video.h>
+#include <fmt/core.h>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <iostream>
+using fmt::format;
 EntityManager manager;
 SDL_Renderer *Game::renderer = nullptr;
 AssetManager *Game::assetManager;
 SDL_Event *Game::event{};
+SDL_Rect Game::camera{0, 0, WINDOW_WIDTH, WINDOW_HEIGH};
+Map *map;
+Entity *player = nullptr;
+
 Game::Game()
 {
     this->isRunning = true;
@@ -84,20 +91,29 @@ void Game::LoadLevel(int levelNumber)
         std::string("/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/images/radar.png")
             .c_str());
 
+    assetManager->AddTexture(
+        "jungle-tiletexture",
+        "/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/tilemaps/jungle.png");
+
+    map = new Map("jungle-tiletexture", 2, 32);
+    map->LoadMap("/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/tilemaps/jungle.map", 25,
+                 20);
+
     /*
      * start including new entities and also components to them
      */
 
-    Entity &tankEntity(manager.AddEntity("tank"));
+    Entity &tankEntity(manager.AddEntity("tank", LayerType::ENEMY_LAYER));
     tankEntity.addComponent<TransformComponent>(0, 0, 20, 20, 32, 32, 1);
     tankEntity.addComponent<SpriteComponent>("tank-image");
 
-    Entity &chopperEntity(manager.AddEntity("chopper"));
+    Entity &chopperEntity(manager.AddEntity("chopper", LayerType::PLAYER_LAYER));
     chopperEntity.addComponent<TransformComponent>(240, 106, 0, 0, 32, 32, 1);
     chopperEntity.addComponent<SpriteComponent>("chopper-image", 2, 90, true, false);
     chopperEntity.addComponent<KeyboardControlComponent>("up", "down", "right", "left", "space");
+    player = &chopperEntity;
 
-    Entity &radarEntity(manager.AddEntity("radar"));
+    Entity &radarEntity(manager.AddEntity("radar", LayerType::UI_LAYER));
     radarEntity.addComponent<TransformComponent>(720, 15, 0, 0, 64, 64, 1);
     radarEntity.addComponent<SpriteComponent>("radar-image", 8, 150, false, true);
 
@@ -137,6 +153,16 @@ void Game::Update()
     }
     deltaTime_ms = MIN_DELTA_TIME;
     manager.Update(deltaTime_ms);
+    HandleCameraMovement();
+}
+
+void Game::HandleCameraMovement()
+{
+    auto transform = player->GetComponet<TransformComponent>();
+    camera.x = transform->position.x - WINDOW_WIDTH / 2;
+    camera.y = transform->position.y - WINDOW_HEIGH / 2;
+    camera.x = (camera.x > 0) ? (camera.x<WINDOW_WIDTH?camera.x:WINDOW_WIDTH) : 0;
+    camera.y = (camera.y > 0) ? (camera.y<WINDOW_HEIGH?camera.y:WINDOW_HEIGH) : 0;
 }
 
 void Game::Render()

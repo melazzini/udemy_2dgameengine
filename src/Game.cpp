@@ -3,6 +3,7 @@
 #include "Components/ColliderComponent.hpp"
 #include "Components/KeyboardControlComponent.hpp"
 #include "Components/SpriteComponent.hpp"
+#include "Components/TextLabelComponent.hpp"
 #include "Components/TransformComponent.hpp"
 #include "Constants.hpp"
 #include "Entity.hpp"
@@ -11,8 +12,10 @@
 #include <SDL.h>
 #include <SDL_events.h>
 #include <SDL_keycode.h>
+#include <SDL_pixels.h>
 #include <SDL_render.h>
 #include <SDL_timer.h>
+#include <SDL_ttf.h>
 #include <SDL_video.h>
 #include <fmt/core.h>
 #include <glm/fwd.hpp>
@@ -47,6 +50,12 @@ void Game::Initialize(int width, int height)
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
         std::cerr << "Error initializing SDL." << std::endl;
+        return;
+    }
+
+    if (TTF_Init() != 0)
+    {
+        std::cerr << "Error initializing SDL2_TTF" << std::endl;
         return;
     }
 
@@ -96,6 +105,10 @@ void Game::LoadLevel(int levelNumber)
         "jungle-tiletexture",
         "/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/tilemaps/jungle.png");
 
+    assetManager->AddFont("charriot-font",
+                          "/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/fonts/charriot.ttf",
+                          14);
+
     map = new Map("jungle-tiletexture", 2, 32);
     map->LoadMap("/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/tilemaps/jungle.map", 25,
                  20);
@@ -119,6 +132,10 @@ void Game::LoadLevel(int levelNumber)
     Entity &radarEntity(manager.AddEntity("radar", LayerType::UI_LAYER));
     radarEntity.addComponent<TransformComponent>(720, 15, 0, 0, 64, 64, 1);
     radarEntity.addComponent<SpriteComponent>("radar-image", 8, 150, false, true);
+
+    Entity &labelLevelName(manager.AddEntity("LabelLevelName", LayerType::UI_LAYER));
+    labelLevelName.addComponent<TextLabelComponent>(10, 10, "First Level ... ", "charriot-font",
+                                                    WHITE_COLOR);
 
     manager.DisplayAllEntities();
 }

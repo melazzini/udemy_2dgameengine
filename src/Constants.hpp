@@ -1,4 +1,5 @@
 #pragma once
+#include <SDL2/SDL_image.h>
 
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGH = 600;
@@ -26,3 +27,8 @@ enum LayerType
 };
 
 const unsigned int NUM_LAYERS = 6;
+
+static const SDL_Color WHITE_COLOR = {255, 255, 255, 255};
+static const SDL_Color GREEN_COLOR = {0, 255, 0, 255};
+static const SDL_Color RED_COLOR = {255, 0, 0, 255};
+static const SDL_Color BLUE_COLOR = {0, 0, 255, 255};

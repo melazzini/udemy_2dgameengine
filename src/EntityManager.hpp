@@ -20,4 +20,5 @@ class EntityManager
     unsigned int GetEntityCount();
     void DisplayAllEntities() const;
     CollisionType CheckCollisions() const;
+    void DestroyInactiveEntities();
 };

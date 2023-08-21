@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <type_traits>
 #include <vector>
 
 void EntityManager::ClearData()
@@ -26,6 +27,19 @@ void EntityManager::Update(float deltaTime)
     for (auto &entity : entities)
     {
         entity->Update(deltaTime);
+    }
+
+    DestroyInactiveEntities();
+}
+
+void EntityManager::DestroyInactiveEntities()
+{
+    for (int i{}; i < entities.size(); i++)
+    {
+        if (!entities[i]->IsActive())
+        {
+            entities.erase(std::begin(entities) + i);
+        }
     }
 }
 
@@ -107,6 +121,17 @@ CollisionType EntityManager::CheckCollisions() const
                 (colliderTag1 == "enemy" && colliderTag2 == "player"))
             {
                 return CollisionType::PLAYER_ENEMY_COLLISION;
+            }
+        }
+        if (colliderEntity != std::end(entities))
+        {
+            auto colliderTag1 = (*colliderEntity)->GetComponet<ColliderComponent>()->colliderTag;
+            auto colliderTag2 = (*iter)->GetComponet<ColliderComponent>()->colliderTag;
+
+            if ((colliderTag1 == "player" && colliderTag2 == "projectile") ||
+                (colliderTag1 == "projectile" && colliderTag2 == "player"))
+            {
+                return CollisionType::PLAYER_PROJECTILE_COLLISTION;
             }
         }
     }

@@ -2,6 +2,7 @@
 #include "AssetManager.hpp"
 #include "Components/ColliderComponent.hpp"
 #include "Components/KeyboardControlComponent.hpp"
+#include "Components/ProjectileEmitterComponent.hpp"
 #include "Components/SpriteComponent.hpp"
 #include "Components/TextLabelComponent.hpp"
 #include "Components/TransformComponent.hpp"
@@ -21,6 +22,8 @@
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <iostream>
+#include <string>
+
 using fmt::format;
 EntityManager manager;
 SDL_Renderer *Game::renderer = nullptr;
@@ -80,6 +83,96 @@ void Game::Initialize(int width, int height)
     event = new SDL_Event;
     return;
 }
+void Game::LoadLevelWithLua(int levelNumber)
+{
+    /*
+    sol::state lua;
+    lua.open_libraries(sol::lib::base, sol::lib::os, sol::lib::math);
+    std::string levelName = "Level" + std::to_string(levelNumber);
+    lua.script_file(
+        format("/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/scripts/{}.lua", levelName));
+    sol::table levelData = lua[levelName];
+    sol::table levelAssets = levelData["assets"];
+    *
+     * LOAD ASSETS WITH LUA
+     *
+    unsigned int assetIndex = 0;
+    while (true)
+    {
+        sol::optional<sol::table> existsAssetIndexNode = levelAssets[assetIndex];
+        if (existsAssetIndexNode == sol::nullopt)
+        {
+            break;
+        }
+        else
+        {
+            sol::table asset = levelAssets[assetIndex];
+            std::string assetType = asset["type"];
+            if (assetType == "texture")
+            {
+                std::string assetId = asset["id"];
+                std::string assetFile = asset["file"];
+                assetManager->AddTexture(assetId, assetFile.c_str());
+            }
+        }
+    }
+
+    *
+     * LOAD MAP WITH LUA
+     *
+    sol::table levelMap = levelData["map"];
+    std::string mapTextureId = levelMap["textureAssetId"];
+    std::string mapFile = levelMap["file"];
+
+    map = new Map(mapTextureId, static_cast<int>(levelMap["scale"]), static_cast<int>(levelMap["tileSize"]));
+    map->LoadMap(mapFile, static_cast<int>(levelMap["mapSizeX"]), static_cast<int>(levelMap["mapSizeY"]));
+    */
+    sol::state lua;
+    lua.open_libraries(sol::lib::base, sol::lib::os, sol::lib::math);
+
+    std::string levelName = "Level" + std::to_string(levelNumber);
+    lua.script_file("/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/scripts/" + levelName + ".lua");
+
+    /*********************************************/
+    /* LOADS ASSETS FROM LUA CONFIG FILE         */
+    /*********************************************/
+    sol::table levelData = lua[levelName];
+    sol::table levelAssets = levelData["assets"];
+
+    unsigned int assetIndex = 0;
+    while (true)
+    {
+        sol::optional<sol::table> existsAssetIndexNode = levelAssets[assetIndex];
+        if (existsAssetIndexNode == sol::nullopt)
+        {
+            break;
+        }
+        else
+        {
+            sol::table asset = levelAssets[assetIndex];
+            std::string assetType = asset["type"];
+            if (assetType.compare("texture") == 0)
+            {
+                std::string assetId = asset["id"];
+                std::string assetFile = asset["file"];
+                assetManager->AddTexture(assetId, assetFile.c_str());
+            }
+        }
+        assetIndex++;
+    }
+
+    /*********************************************/
+    /* LOADS MAP FROM LUA CONFIG FILE            */
+    /*********************************************/
+    sol::table levelMap = levelData["map"];
+    std::string mapTextureId = levelMap["textureAssetId"];
+    std::string mapFile = levelMap["file"];
+
+    map = new Map(mapTextureId, static_cast<int>(levelMap["scale"]), static_cast<int>(levelMap["tileSize"]));
+
+    map->LoadMap(mapFile, static_cast<int>(levelMap["mapSizeX"]), static_cast<int>(levelMap["mapSizeY"]));
+}
+
 void Game::LoadLevel(int levelNumber)
 {
     /*
@@ -109,6 +202,10 @@ void Game::LoadLevel(int levelNumber)
                           "/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/fonts/charriot.ttf",
                           14);
 
+    assetManager->AddTexture(
+        "projectile-image",
+        "/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/images/bullet-enemy.png");
+
     map = new Map("jungle-tiletexture", 2, 32);
     map->LoadMap("/home/francisco/Projects/gameEngines/SDL_UDEMY/udemy_2dgameengine/assets/tilemaps/jungle.map", 25,
                  20);
@@ -134,8 +231,17 @@ void Game::LoadLevel(int levelNumber)
     radarEntity.addComponent<SpriteComponent>("radar-image", 8, 150, false, true);
 
     Entity &labelLevelName(manager.AddEntity("LabelLevelName", LayerType::UI_LAYER));
-    labelLevelName.addComponent<TextLabelComponent>(10, 10, "First Level ... ", "charriot-font",
-                                                    WHITE_COLOR);
+    labelLevelName.addComponent<TextLabelComponent>(10, 10, "First Level ... ", "charriot-font", WHITE_COLOR);
+
+    Entity &projectile(manager.AddEntity("projectile", LayerType::PROJECTILE_LAYER));
+    projectile.addComponent<TransformComponent>(150 + 16, 495 + 16, 0, 0, 4, 4, 1);
+    projectile.addComponent<SpriteComponent>("projectile-image");
+    projectile.addComponent<ColliderComponent>("projectile", 150 + 16, 495 + 16, 4, 4);
+    projectile.addComponent<ProjectileEmitterComponent>(50,  // speed
+                                                        270, // angle
+                                                        200, // range, number of px before it destroys itself
+                                                        true // shoot in loop
+    );
 
     manager.DisplayAllEntities();
 }
@@ -189,7 +295,8 @@ void Game::HandleCameraMovement()
 void Game::CheckCollisions()
 {
     auto collitionTagType = manager.CheckCollisions();
-    if (collitionTagType == CollisionType::PLAYER_ENEMY_COLLISION)
+    if (collitionTagType == CollisionType::PLAYER_ENEMY_COLLISION ||
+        collitionTagType == CollisionType::PLAYER_PROJECTILE_COLLISTION)
     {
         ProcessGameOver();
     }

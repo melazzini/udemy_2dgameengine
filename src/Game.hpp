@@ -5,6 +5,7 @@
 #include <SDL_events.h>
 #include <SDL_render.h>
 #include <SDL_video.h>
+#include "../lib/lua/sol.hpp"
 
 class AssetManager;
 class Game
@@ -22,6 +23,7 @@ class Game
     static SDL_Event *event;
     static SDL_Rect camera;
     void LoadLevel(int levelNumber);
+    void LoadLevelWithLua(int levelNumber);
     void HandleCameraMovement();
     void CheckCollisions();
     void ProcessGameOver();
